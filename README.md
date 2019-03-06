@@ -24,10 +24,11 @@ USAGE:
  ansible-playbook -i inventory test.yml -k --ask-vault-pass
 ```
 vars/vault.yml
+```
 vault_rhn_user: redhat-support-active-account 
 vault_rhn_pwd: p4$$W0rD
 vault_rhn_pool_id: 01123581321245589144233377610987
-
+```
 playbook.yml
 ```
 - hosts: lab
