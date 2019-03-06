@@ -18,10 +18,13 @@ Example Playbook
 ----------------
 USAGE:   
 
-"# ansible-vault create vars/vault.yml"
-"# ansible-vault encrypt vars/vault.yml"
-"# ansible-vault edit vars/vault.yml"
-"# ansible-playbook -i inventory test.yml -k --ask-vault-pass"
+...
+# ansible-vault create vars/vault.yml
+# ansible-vault encrypt vars/vault.yml
+# ansible-vault edit vars/vault.yml
+# ansible-playbook -i inventory test.yml -k --ask-vault-pass
+...
+
 vars/vaul.yml
 
 ---
