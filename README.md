@@ -17,20 +17,19 @@ NA
 Example Playbook
 ----------------
 USAGE:   
-
-...
+```
  ansible-vault create vars/vault.yml
  ansible-vault encrypt vars/vault.yml
  ansible-vault edit vars/vault.yml
  ansible-playbook -i inventory test.yml -k --ask-vault-pass
-...
-
+```
 vars/vault.yml
 vault_rhn_user: redhat-support-active-account 
 vault_rhn_pwd: p4$$W0rD
 vault_rhn_pool_id: 01123581321245589144233377610987
 
 playbook.yml
+```
 - hosts: lab
   gather_facts: yes
   remote_user: silvinux
@@ -71,6 +70,7 @@ playbook.yml
       dm_pass: redhat1234
       admin_pass: Redhat1234
       forward_ip: 8.8.8.8
+```
 
 License
 -------
