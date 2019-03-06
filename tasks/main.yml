@@ -27,16 +27,16 @@
     username: "{{ rhn_user }}"
     password: "{{ rhn_pwd }}"
     pool: "{{ rhn_pool_name }}"
-  when: ansible_distribution == 'RedHat' and register_rhn and subscription_status == 'Current' and repositories_status >= "5"
+  when: ansible_distribution == 'RedHat' and register_rhn and subscription_status != 'Current'
 
 - name: "Disable all repositories"
   command: subscription-manager repos --disable=\*
-  when: ansible_distribution == 'RedHat' and register_rhn and subscription_status == 'Current' and repositories_status >= "5"
+  when: ansible_distribution == 'RedHat' and register_rhn and repositories_status <= "5"
 
 - name: "Enable the needed rhel repositories"
   command: subscription-manager repos --enable={{ item }}
   with_items: "{{ rhel_repos }}"
-  when: ansible_distribution == 'RedHat' and register_rhn and subscription_status == 'Current' and repositories_status >= "5"
+  when: ansible_distribution == 'RedHat' and register_rhn and repositories_status <= "5"
 
 - name: "Update packages"
   yum:
