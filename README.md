@@ -19,21 +19,18 @@ Example Playbook
 USAGE:   
 
 ...
-# ansible-vault create vars/vault.yml
-# ansible-vault encrypt vars/vault.yml
-# ansible-vault edit vars/vault.yml
-# ansible-playbook -i inventory test.yml -k --ask-vault-pass
+ ansible-vault create vars/vault.yml
+ ansible-vault encrypt vars/vault.yml
+ ansible-vault edit vars/vault.yml
+ ansible-playbook -i inventory test.yml -k --ask-vault-pass
 ...
 
-vars/vaul.yml
-
----
+vars/vault.yml
 vault_rhn_user: redhat-support-active-account 
 vault_rhn_pwd: p4$$W0rD
 vault_rhn_pool_id: 01123581321245589144233377610987
 
 playbook.yml
----
 - hosts: lab
   gather_facts: yes
   remote_user: silvinux
