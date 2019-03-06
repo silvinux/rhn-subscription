@@ -1,0 +1,5 @@
+---
+- hosts: lab
+  remote_user: root
+  roles:
+    - role: ../../rhn-subscription

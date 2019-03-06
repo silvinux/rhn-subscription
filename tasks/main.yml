@@ -1,0 +1,81 @@
+---
+# tasks file for rhn-subscription
+- name: "Add dns/ip to /etc/hosts"
+  lineinfile:
+    dest: /etc/hosts
+    state: present
+    regexp: "^{{ external_ip }}"
+    line: "{{ external_ip }}  {{ hostname_full }}  {{ hostname_short }}"
+
+- name: "Check if host is registered to RHN"
+  shell: subscription-manager status| awk '/Overall Status:/{print $3}'
+  register: subscription_status
+  changed_when: false
+
+- name: "Check if repositories are enabled already"
+  shell: "subscription-manager repos --list-enabled| awk '/Enabled:   1/ {count ++} END {print count}'"
+  register: repositories_status
+  changed_when: false
+
+- name: import secret variable file
+  include_vars: "vars/vault.yml"
+  no_log: true
+
+- name: "register System with RHN Subscription Manager"
+  redhat_subscription:
+    state: present
+    username: "{{ rhn_user }}"
+    password: "{{ rhn_pwd }}"
+    pool: "{{ rhn_pool_name }}"
+  when: ansible_distribution == 'RedHat' and register_rhn and subscription_status == 'Current' and repositories_status >= "5"
+
+- name: "Disable all repositories"
+  command: subscription-manager repos --disable=\*
+  when: ansible_distribution == 'RedHat' and register_rhn and subscription_status == 'Current' and repositories_status >= "5"
+
+- name: "Enable the needed rhel repositories"
+  command: subscription-manager repos --enable={{ item }}
+  with_items: "{{ rhel_repos }}"
+  when: ansible_distribution == 'RedHat' and register_rhn and subscription_status == 'Current' and repositories_status >= "5"
+
+- name: "Update packages"
+  yum:
+    name: '*'
+    state: latest
+  register: yum_result
+
+- name: "Check if loaded kernel is the latest"
+  shell: if [ $(uname -r) == $(rpm -q kernel | tail -n 1 | sed -e 's/kernel-//g') ] ; then echo no ; else echo reboot; fi
+  ignore_errors: true
+  register: reboot_hint
+
+- name: "Make sure packages are not installed"
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ packages_uninstall }}"
+
+- name: "Make sure packages are installed"
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ packages_install }}"
+
+- name: "Reboot server, load new kernel"
+  shell: sleep 2 && shutdown -r now "Ansible Restart Triggered"
+  async: 1
+  poll: 0
+  ignore_errors: true
+  when: yum_result.changed or reboot_hint.stdout.find("reboot") != -1
+
+- name: "Waiting for server to come back"
+  wait_for:
+    host: "{{ inventory_hostname }}"
+    state: started
+    delay: 10
+    connect_timeout: 5
+    timeout: 300
+    port: 22
+  delegate_to: 127.0.0.1
+  become: false
+  ignore_errors: true
